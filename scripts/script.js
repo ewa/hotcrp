@@ -5734,6 +5734,62 @@ return plinfo;
 })();
 
 
+/* formula editor functions */
+function edit_formulas() {
+    var $d, nformulas = 0;
+    function push_formula(hc, f) {
+        ++nformulas;
+        hc.push('<div class="editformulas-formula" data-formula-number="' + nformulas + '">', '</div>');
+        hc.push('<div class="f-i"><div class="f-c">Name</div><div class="f-e">');
+        if (f.editable) {
+            hc.push('<div style="float:right"><a class="closebtn delete-link need-tooltip" href="#" style="display:inline-block;margin-left:0.5em" data-tooltip="Delete formula">x</a></div>');
+            hc.push('<textarea class="editformulas-name" name="formulaname_' + nformulas + '" rows="1" cols="60" style="width:37.5rem;width:calc(99% - 2.5em)">' + escape_entities(f.name) + '</textarea>');
+            hc.push('<hr class="c" />');
+        } else
+            hc.push(escape_entities(f.name));
+        hc.push('</div></div><div class="f-i"><div class="f-c">Definition</div><div class="f-e">');
+        if (f.editable)
+            hc.push('<textarea class="editformulas-expression" name="formulaexpression_' + nformulas + '" rows="1" cols="60" style="width:39.5rem;width:calc(99%)">' + escape_entities(f.expression) + '</textarea>')
+                .push('<input type="hidden" name="formulaid_' + nformulas + '" value="' + f.id + '" />');
+        else
+            hc.push(escape_entities(f.expression));
+        hc.push_pop('</div></div>');
+    }
+    function onclick() {
+        if (this.name == "cancel")
+            popup_close($d);
+        else if (this.name == "add") {
+            var hc = new HtmlCollector;
+            push_formula(hc, {name: "", expression: "", editable: true, id: "new"});
+            var $f = $(hc.render()).appendTo($d.find(".editformulas"));
+            $f.find("textarea").autogrow();
+        }
+    }
+    function ondelete() {
+        var $x = $(this).closest(".editformulas-formula");
+        $x.find(".editformulas-expression").closest(".f-i").hide();
+        $x.find(".editformulas-name").prop("disabled", true).css("text-decoration", "line-through");
+        $x.append('<em>(Formula deleted)</em><input type="hidden" name="formuladeleted_' + $x.data("formulaNumber") + '" value="1" />');
+        return false;
+    }
+    function create() {
+        var hc = popup_skeleton(), i;
+        hc.push('<div style="max-width:480px;max-width:40rem;position:relative">', '</div>');
+        hc.push('<h2>Edit formulas</h2>');
+        hc.push('<p><a href="' + hoturl("help", "t=formulas") + '">Formulas</a> are numbers calculated from review statistics and paper information. For example, “sum(OveMer)” might sum a paper’s Overall merit scores.</p>');
+        hc.push('<div class="editformulas">', '</div>');
+        for (i in edit_formulas.formulas || [])
+            push_formula(hc, edit_formulas.formulas[i]);
+        hc.pop_push('<button name="add" type="button" class="btn">Add formula</button>');
+        hc.push_actions(['<button name="save" type="submit" tabindex="1000" class="btn btn-default popup-btn">Save</button>', '<button name="cancel" type="button" tabindex="1001" class="btn popup-btn">Cancel</button>']);
+        $d = popup_render(hc);
+        $d.on("click", "button", onclick);
+        $d.on("click", "a.delete-link", ondelete);
+    }
+    create();
+}
+
+
 /* pattern fill functions */
 window.make_pattern_fill = (function () {
 var fmap = {}, cmap = {"whitetag": 1, "redtag": 2, "orangetag": 3, "yellowtag": 4, "greentag": 5, "bluetag": 6, "purpletag": 7, "graytag": 8},

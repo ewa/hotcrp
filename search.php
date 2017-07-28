@@ -106,7 +106,7 @@ if (isset($Qreq->savedisplayoptions) && $Me->privChair) {
 // save formula
 function formulas_with_new() {
     global $Conf, $Me, $Qreq;
-    $formulas = $Conf->visible_named_formulas($Me, $Qreq->t == "a");
+    $formulas = $Conf->viewable_named_formulas($Me, $Qreq->t == "a");
     $formulas["n"] = (object) array("formulaId" => "n", "name" => "",
                                     "expression" => "", "createdBy" => 0);
     return $formulas;
@@ -422,7 +422,7 @@ if ($pl) {
 
     // Formulas group
     $display_options->set_header(40, "<strong>Formulas:</strong>");
-    foreach ($Conf->visible_named_formulas($Me, $Qreq->t == "a") as $formula)
+    foreach ($Conf->viewable_named_formulas($Me, $Qreq->t == "a") as $formula)
         $display_options->checkbox_item(40, "formula{$formula->formulaId}", htmlspecialchars($formula->name));
 }
 
@@ -592,8 +592,17 @@ if ($pl && $pl->count > 0) {
             "&nbsp;", Ht::label("Override conflicts", "showforce"), "</td>";
 
     // Edit formulas link
-    if ($Me->isPC && $Qreq->t != "a")
-        echo "<td class='padlb'>", Ht::js_button("Edit formulas", "fold('searchform',0,3)"), "</td>";
+    if ($Me->isPC && $Qreq->t != "a") {
+        $fjs = [];
+        foreach ($Conf->viewable_named_formulas($Me, false) as $f) {
+            $fj = ["name" => $f->name, "expression" => $f->expression, "id" => $f->formulaId];
+            if ($Me->can_edit_formula($f))
+                $fj["editable"] = true;
+            $fjs[] = $fj;
+        }
+        Ht::stash_script("edit_formulas.formulas=" . json_encode($fjs));
+        echo "<td class='padlb'>", Ht::js_button("Edit formulas", "edit_formulas()"), "</td>";
+    }
 
     echo "<td class='padlb'>";
     // "Set default display"
@@ -633,7 +642,7 @@ would display the sum of a paper’s Overall merit scores.
             "<th></th><th class='f-c'>Name</th><th class='f-c'>Definition</th>",
             "</tr></thead><tbody>";
         $any = 0;
-        $fs = $Conf->visible_named_formulas($Me, $Qreq->t == "a");
+        $fs = $Conf->viewable_named_formulas($Me, $Qreq->t == "a");
         $fs["n"] = (object) array("formulaId" => "n", "name" => "", "expression" => "", "createdBy" => 0);
         foreach ($fs as $formulaId => $fdef) {
             $name = defval($Qreq, "name_$formulaId", $fdef->name);

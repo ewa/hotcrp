@@ -1760,6 +1760,10 @@ span.dragtaghandle {
 	background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAGCAYAAADgzO9IAAAAAXNSR0IArs4c6QAAADtJREFUCNdjOHz4zs/Dh+9cYEADTAwMDF8YGBj4Dh++gypha6sizMDAoMSADyAby4Qm94WBgYEPn04GAD/XFLwv6x9HAAAAAElFTkSuQmCC') repeat;
 }
 
+.editformulas-formula {
+	margin: 1em 0 2em;
+}
+
 span.match {
 	color: #ff6600;
 	font-weight: bold;
